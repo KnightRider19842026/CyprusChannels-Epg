@@ -1,0 +1,37 @@
+name: RIK EPG
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Chrome
+        run: |
+          sudo apt update
+          sudo apt install -y chromium-browser chromium-chromedriver
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install deps
+        run: pip install selenium
+
+      - name: Run script
+        run: python epg.py
+
+      - name: Push XML
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add epg.xml
+          git commit -m "Update EPG" || echo "No changes"
+          git push
